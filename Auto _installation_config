@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Detect the Linux distribution
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    DISTRO=$ID
+else
+    echo "Unknown Linux distribution"
+    echo "Please enter your Linux distribution (arch/debian): "
+    read DISTRO
+fi
+
+# Update and install necessary packages based on the distribution
+if [ "$DISTRO" == "arch" ]; then
+    sudo pacman -Syu --noconfirm
+    sudo pacman -S --noconfirm i3-gaps polybar picom kitty alacritty firefox dmenu powerline xfce4-appfinder
+elif [ "$DISTRO" == "debian" ]; then
+    sudo apt update
+    sudo apt install -y i3 polybar picom kitty alacritty firefox dmenu powerline xfce4-appfinder
+else
+    echo "Unsupported Linux distribution: $DISTRO"
+    exit 1
+fi
+
+# Clone the dotfiles repository
+git clone https://github.com/Arc-V1/dotfiles.git
+
+# Extract the configuration files
+tar -xzf dotfiles/config.tar.gz -C dotfiles
+
+# Rename and copy configuration files to their respective directories
+mv dotfiles/.config/i3/config ~/.config/i3/config
+mv dotfiles/.config/polybar/config ~/.config/polybar/config
+mv dotfiles/.config/picom.conf ~/.config/picom.conf
+mv dotfiles/.config/kitty/kitty.conf ~/.config/kitty/kitty.conf
+mv dotfiles/.config/alacritty/alacritty.yml ~/.config/alacritty/alacritty.yml
+mv dotfiles/.mozilla/firefox/profile.default/user.js ~/.mozilla/firefox/profile.default/user.js
+mv dotfiles/.dmenurc ~/.dmenurc
+echo "source /usr/share/powerline/bindings/bash/powerline.sh" >> ~/.bashrc
+echo "source /usr/share/powerline/bindings/zsh/powerline.zsh" >> ~/.zshrc
+
+# Additional configurations can be added as needed
+
+echo "Configuration completed for $DISTRO"
